@@ -1,26 +1,38 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+    <RouterView />
+  </div>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
+<script setup>
+import { onMounted } from 'vue'
+import { useAuthStore } from './stores/auth.js'
+import { getTenantConfig, setTenantStyling } from './utils/tenant-config.js'
 
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+const authStore = useAuthStore()
+
+onMounted(() => {
+  // Restore authentication state
+  authStore.restoreSession()
+  
+  // Apply tenant-specific styling
+  const tenantConfig = getTenantConfig()
+  setTenantStyling(tenantConfig)
+})
 </script>
 
 <style>
+:root {
+  --primary-color: #dc2626;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  min-height: 100vh;
 }
 </style>
