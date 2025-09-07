@@ -1,54 +1,86 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
-      <div>
-        <img 
-          class="mx-auto h-12 w-auto" 
-          :src="tenantConfig.logoUrl" 
-          :alt="`${tenantConfig.displayName} Logo`"
-        />
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to {{ tenantConfig.displayName }}
+      <!-- Logo and Title Section -->
+      <div class="text-center">
+        <div class="mx-auto h-16 w-16 bg-primary-600 rounded-full flex items-center justify-center mb-4">
+          <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-900">
+          Welcome Back
         </h2>
+        <p class="mt-2 text-sm text-gray-600">
+          Sign in to {{ tenantConfig.displayName }}
+        </p>
       </div>
-      
-      <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
-        <div class="rounded-md shadow-sm -space-y-px">
-          <div>
-            <input
-              v-model="form.username"
-              type="text"
-              required
-              class="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-              placeholder="Username"
-            />
-          </div>
-          <div>
-            <input
-              v-model="form.password"
-              type="password"
-              required
-              class="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-              placeholder="Password"
-            />
-          </div>
-        </div>
 
-        <div v-if="error" class="text-red-600 text-sm text-center">
-          {{ error }}
-        </div>
+      <!-- Login Form Card -->
+      <div class="card">
+        <form class="space-y-6" @submit.prevent="handleSubmit">
+          <div class="space-y-4">
+            <div>
+              <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                Username
+              </label>
+              <input
+                id="username"
+                v-model="form.username"
+                type="text"
+                required
+                class="input-field w-full"
+                placeholder="Enter your username"
+              />
+            </div>
+            
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                id="password"
+                v-model="form.password"
+                type="password"
+                required
+                class="input-field w-full"
+                placeholder="Enter your password"
+              />
+            </div>
+          </div>
 
-        <div>
+          <!-- Error Message -->
+          <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div class="flex">
+              <svg class="h-5 w-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.768 0L3.046 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span class="text-sm text-red-800">{{ error }}</span>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
           <button
             type="submit"
             :disabled="authStore.loading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+            class="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
+            <svg v-if="authStore.loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
             <span v-if="!authStore.loading">Sign in</span>
             <span v-else>Signing in...</span>
           </button>
-        </div>
-      </form>
+
+          <!-- Additional Options -->
+          <div class="text-center">
+            <p class="text-sm text-gray-500">
+              Secure login powered by {{ tenantConfig.tenantName }}
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -82,17 +114,3 @@ const handleSubmit = async () => {
 }
 </script>
 
-<style scoped>
-.bg-primary {
-  background-color: var(--primary-color);
-}
-.hover\:bg-primary-dark:hover {
-  background-color: color-mix(in srgb, var(--primary-color) 90%, black);
-}
-.focus\:ring-primary:focus {
-  --tw-ring-color: var(--primary-color);
-}
-.focus\:border-primary:focus {
-  border-color: var(--primary-color);
-}
-</style>
