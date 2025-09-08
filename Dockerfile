@@ -4,6 +4,24 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 
+# Set build-time environment variables with defaults
+ARG VUE_APP_TENANT_NAME=acme
+ARG VUE_APP_AUTH_API_URL=http://localhost:5130
+ARG VUE_APP_API_BASE_URL=http://localhost:5142
+ARG VUE_APP_TITLE="Acme Corporation Portal"
+ARG VUE_APP_PRIMARY_COLOR="#dc2626"
+ARG VUE_APP_LOGO_URL="/logos/acme-logo.png"
+ARG VUE_APP_ENVIRONMENT
+
+# Set environment variables for the build process
+ENV VUE_APP_TENANT_NAME=$VUE_APP_TENANT_NAME
+ENV VUE_APP_AUTH_API_URL=$VUE_APP_AUTH_API_URL
+ENV VUE_APP_API_BASE_URL=$VUE_APP_API_BASE_URL
+ENV VUE_APP_TITLE=$VUE_APP_TITLE
+ENV VUE_APP_PRIMARY_COLOR=$VUE_APP_PRIMARY_COLOR
+ENV VUE_APP_LOGO_URL=$VUE_APP_LOGO_URL
+ENV VUE_APP_ENVIRONMENT=$VUE_APP_ENVIRONMENT
+
 # Copy package files
 COPY package*.json ./
 COPY pnpm-lock.yaml* ./
@@ -21,8 +39,8 @@ RUN pnpm run build
 # Production stage
 FROM nginx:alpine AS final
 
-# Copy custom nginx configuration
-COPY <<EOF /etc/nginx/conf.d/default.conf
+# Create nginx configuration
+RUN cat > /etc/nginx/conf.d/default.conf << 'EOF'
 server {
     listen 80;
     server_name localhost;
@@ -35,7 +53,7 @@ server {
 
     # Handle client-side routing
     location / {
-        try_files \$uri \$uri/ /index.html;
+        try_files $uri $uri/ /index.html;
     }
 
     # Cache static assets

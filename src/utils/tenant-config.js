@@ -22,7 +22,8 @@ export const getTenantConfig = () => {
     primaryColor: process.env.VUE_APP_PRIMARY_COLOR || '#dc2626',
     logoUrl: process.env.VUE_APP_LOGO_URL || `/logos/${tenantName}-logo.png`,
     apiBaseUrl: process.env.VUE_APP_API_BASE_URL || 'https://localhost:7231',
-    authApiUrl: process.env.VUE_APP_AUTH_API_URL || 'https://localhost:7258'
+    authApiUrl: process.env.VUE_APP_AUTH_API_URL || 'https://localhost:7258',
+    environment: process.env.VUE_APP_ENVIRONMENT || 'development'
   }
 }
 
