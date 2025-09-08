@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { jwtDecode } from 'jwt-decode'
 import { authApi } from '../utils/api.js'
-import { getTenantConfig } from '../utils/tenant-config.js'
+import { getTenantConfig, getTenantConfigSync } from '../utils/tenant-config.js'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -20,7 +20,15 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     
     try {
-      const tenantConfig = getTenantConfig()
+      // Try to get full config, fallback to sync config
+      let tenantConfig
+      try {
+        tenantConfig = await getTenantConfig()
+      } catch (error) {
+        console.warn('Failed to get async tenant config, using sync fallback:', error)
+        tenantConfig = getTenantConfigSync()
+      }
+      
       const loginRequest = {
         ...credentials,
         tenantName: tenantConfig.tenantName

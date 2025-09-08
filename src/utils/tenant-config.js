@@ -1,3 +1,7 @@
+// Cache for tenant configuration to avoid repeated API calls
+let tenantConfigCache = null
+let tenantConfigPromise = null
+
 const getTenantFromUrl = () => {
   const hostname = window.location.hostname
   
@@ -32,32 +36,58 @@ const fetchTenantFromApi = async (tenantName) => {
 }
 
 export const getTenantConfig = async () => {
-  const tenantName = getTenantFromUrl()
-  
-  // Try to fetch tenant data from API
-  const tenantData = await fetchTenantFromApi(tenantName)
-  
-  return {
-    tenantName,
-    displayName: process.env.VUE_APP_TITLE || tenantData?.displayName || `${tenantName.charAt(0).toUpperCase() + tenantName.slice(1)} Portal`,
-    primaryColor: tenantData?.themeColor || '#dc2626',
-    logoUrl: tenantData?.logoUrl || `/logos/${tenantName}-logo.png`,
-    apiBaseUrl: process.env.VUE_APP_API_BASE_URL || 'https://localhost:7231',
-    authApiUrl: process.env.VUE_APP_AUTH_API_URL || 'https://localhost:7258',
-    tenantApiUrl: process.env.VUE_APP_TENANT_API_URL || 'http://localhost:5121',
-    environment: process.env.VUE_APP_ENVIRONMENT || 'development'
+  // Return cached config if available
+  if (tenantConfigCache) {
+    return tenantConfigCache
   }
+
+  // Return existing promise if already fetching
+  if (tenantConfigPromise) {
+    return tenantConfigPromise
+  }
+
+  // Create new fetch promise
+  tenantConfigPromise = (async () => {
+    const tenantName = getTenantFromUrl()
+    
+    // Try to fetch tenant data from API
+    const tenantData = await fetchTenantFromApi(tenantName)
+    
+    const config = {
+      tenantName,
+      displayName: process.env.VUE_APP_TITLE || tenantData?.displayName || `${tenantName.charAt(0).toUpperCase() + tenantName.slice(1)} Portal`,
+      primaryColor: tenantData?.themeColor || process.env.VUE_APP_PRIMARY_COLOR || '#dc2626',
+      logoUrl: tenantData?.logoUrl || process.env.VUE_APP_LOGO_URL || `/logos/${tenantName}-logo.png`,
+      apiBaseUrl: process.env.VUE_APP_API_BASE_URL || 'https://localhost:7231',
+      authApiUrl: process.env.VUE_APP_AUTH_API_URL || 'https://localhost:7258',
+      tenantApiUrl: process.env.VUE_APP_TENANT_API_URL || 'http://localhost:5121',
+      environment: process.env.VUE_APP_ENVIRONMENT || 'development'
+    }
+
+    // Cache the config
+    tenantConfigCache = config
+    tenantConfigPromise = null
+    
+    return config
+  })()
+
+  return tenantConfigPromise
 }
 
 // Synchronous version for cases where we need immediate config
 export const getTenantConfigSync = () => {
+  // Return cached config if available
+  if (tenantConfigCache) {
+    return tenantConfigCache
+  }
+
   const tenantName = getTenantFromUrl()
   
   return {
     tenantName,
     displayName: process.env.VUE_APP_TITLE || `${tenantName.charAt(0).toUpperCase() + tenantName.slice(1)} Portal`,
-    primaryColor: '#dc2626', // Default fallback
-    logoUrl: `/logos/${tenantName}-logo.png`, // Default fallback
+    primaryColor: process.env.VUE_APP_PRIMARY_COLOR || '#dc2626',
+    logoUrl: process.env.VUE_APP_LOGO_URL || `/logos/${tenantName}-logo.png`,
     apiBaseUrl: process.env.VUE_APP_API_BASE_URL || 'https://localhost:7231',
     authApiUrl: process.env.VUE_APP_AUTH_API_URL || 'https://localhost:7258',
     tenantApiUrl: process.env.VUE_APP_TENANT_API_URL || 'http://localhost:5121',

@@ -86,14 +86,14 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth.js'
-import { getTenantConfig } from '../../utils/tenant-config.js'
+import { getTenantConfig, getTenantConfigSync } from '../../utils/tenant-config.js'
 
 const authStore = useAuthStore()
 const router = useRouter()
-const tenantConfig = getTenantConfig()
+const tenantConfig = ref(getTenantConfigSync()) // Use sync version for initial load
 
 const form = reactive({
   username: '',
@@ -101,6 +101,16 @@ const form = reactive({
 })
 
 const error = ref(null)
+
+// Load full tenant config asynchronously
+onMounted(async () => {
+  try {
+    const fullConfig = await getTenantConfig()
+    tenantConfig.value = fullConfig
+  } catch (err) {
+    console.warn('Failed to load full tenant config, using defaults:', err)
+  }
+})
 
 const handleSubmit = async () => {
   error.value = null

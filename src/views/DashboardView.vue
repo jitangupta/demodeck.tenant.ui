@@ -106,9 +106,19 @@ import Header from '../components/common/AppHeader.vue'
 import UserList from '../components/tenant/UserList.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useTenantStore } from '../stores/tenant.js'
-import { getTenantConfig } from '../utils/tenant-config.js'
+import { getTenantConfig, getTenantConfigSync } from '../utils/tenant-config.js'
+import { ref, onMounted } from 'vue'
 
 const authStore = useAuthStore()
 const tenantStore = useTenantStore()
-const tenantConfig = getTenantConfig()
+const tenantConfig = ref(getTenantConfigSync())
+
+onMounted(async () => {
+  try {
+    const fullConfig = await getTenantConfig()
+    tenantConfig.value = fullConfig
+  } catch (err) {
+    console.warn('Failed to load full tenant config, using defaults:', err)
+  }
+})
 </script>
