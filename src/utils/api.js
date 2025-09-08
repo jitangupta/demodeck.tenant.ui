@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getTenantConfig } from './tenant-config.js'
+import { getTenantConfigSync } from './tenant-config.js'
 
 class ApiClient {
   constructor(baseURL) {
@@ -54,12 +54,13 @@ class ApiClient {
 
 // API clients for different services
 const createApiClients = () => {
-  const config = getTenantConfig()
+  const config = getTenantConfigSync()
   
   return {
     authApi: new ApiClient(config.authApiUrl),
-    productApi: new ApiClient(`${config.apiBaseUrl}/${config.tenantName}`)
+    productApi: new ApiClient(`${config.apiBaseUrl}/${config.tenantName}`),
+    tenantApi: new ApiClient(config.tenantApiUrl || 'http://localhost:5121')
   }
 }
 
-export const { authApi, productApi } = createApiClients()
+export const { authApi, productApi, tenantApi } = createApiClients()
