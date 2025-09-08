@@ -55,8 +55,12 @@ EOF
 # Copy built application from build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Copy the entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port 80
 EXPOSE 80
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Use custom entrypoint for runtime configuration
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,3 +1,12 @@
+const getRuntimeConfig = (key) => {
+  // First try runtime config (from container startup)
+  if (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG[key]) {
+    return window.RUNTIME_CONFIG[key]
+  }
+  // Fallback to build-time environment variables (for local development)
+  return process.env[key] || null
+}
+
 const getTenantFromUrl = () => {
   const hostname = window.location.hostname
   
@@ -9,8 +18,8 @@ const getTenantFromUrl = () => {
     }
   }
   
-  // For local development: use environment variable or default
-  return process.env.VUE_APP_TENANT_NAME || 'acme'
+  // For local development: use runtime config or build-time env var or default
+  return getRuntimeConfig('VUE_APP_TENANT_NAME') || 'acme'
 }
 
 export const getTenantConfig = () => {
@@ -18,11 +27,11 @@ export const getTenantConfig = () => {
   
   return {
     tenantName,
-    displayName: process.env.VUE_APP_TITLE || `${tenantName.charAt(0).toUpperCase() + tenantName.slice(1)} Portal`,
-    primaryColor: process.env.VUE_APP_PRIMARY_COLOR || '#dc2626',
-    logoUrl: process.env.VUE_APP_LOGO_URL || `/logos/${tenantName}-logo.png`,
-    apiBaseUrl: process.env.VUE_APP_API_BASE_URL || 'https://localhost:7231',
-    authApiUrl: process.env.VUE_APP_AUTH_API_URL || 'https://localhost:7258'
+    displayName: getRuntimeConfig('VUE_APP_TITLE') || `${tenantName.charAt(0).toUpperCase() + tenantName.slice(1)} Portal`,
+    primaryColor: getRuntimeConfig('VUE_APP_PRIMARY_COLOR') || '#dc2626',
+    logoUrl: getRuntimeConfig('VUE_APP_LOGO_URL') || `/logos/${tenantName}-logo.png`,
+    apiBaseUrl: getRuntimeConfig('VUE_APP_API_BASE_URL') || 'https://localhost:7231',
+    authApiUrl: getRuntimeConfig('VUE_APP_AUTH_API_URL') || 'https://localhost:7258'
   }
 }
 
