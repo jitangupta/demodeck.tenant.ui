@@ -10,7 +10,7 @@
             Dashboard
           </h1>
           <p class="mt-2 text-gray-600">
-            Manage your {{ tenantConfig.displayName }} workspace
+            Manage your {{ tenantConfigStore.config.displayName }} workspace
           </p>
         </div>
 
@@ -58,7 +58,7 @@
                 </div>
               </div>
               <div class="ml-4">
-                <h3 class="text-lg font-medium text-gray-900">{{ tenantConfig.tenantName.toUpperCase() }}</h3>
+                <h3 class="text-lg font-medium text-gray-900">{{ tenantConfigStore.config.tenantName?.toUpperCase() || 'LOADING' }}</h3>
                 <p class="text-sm text-gray-500">Tenant ID</p>
               </div>
             </div>
@@ -71,7 +71,7 @@
             <div class="flex-shrink-0">
               <div class="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center">
                 <span class="text-lg font-semibold text-white">
-                  {{ authStore.user?.username?.charAt(0).toUpperCase() }}
+                  {{ (authStore.user?.username ? authStore.user.username.charAt(0).toUpperCase() : '?') }}
                 </span>
               </div>
             </div>
@@ -80,7 +80,7 @@
                 Welcome back, {{ authStore.user?.username }}!
               </h3>
               <p class="mt-1 text-gray-600">
-                You are logged in as <span class="font-medium text-primary-600">{{ authStore.user?.role }}</span> for {{ tenantConfig.displayName }}.
+                You are logged in as <span class="font-medium text-primary-600">{{ authStore.user?.role }}</span> for {{ tenantConfigStore.config.displayName }}.
               </p>
               <div class="mt-4 flex items-center space-x-4">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -106,9 +106,23 @@ import Header from '../components/common/AppHeader.vue'
 import UserList from '../components/tenant/UserList.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useTenantStore } from '../stores/tenant.js'
-import { getTenantConfig } from '../utils/tenant-config.js'
+import { useTenantConfigStore } from '../stores/tenantConfig.js'
+import { onMounted } from 'vue'
 
 const authStore = useAuthStore()
 const tenantStore = useTenantStore()
-const tenantConfig = getTenantConfig()
+const tenantConfigStore = useTenantConfigStore()
+
+onMounted(async () => {
+  // Tenant config should already be loaded by main.js
+  // Only load if not already initialized (shouldn't happen normally)
+  if (!tenantConfigStore.initialized) {
+    console.warn('Tenant config not initialized on dashboard - loading now')
+    try {
+      await tenantConfigStore.loadTenantConfig()
+    } catch (error) {
+      console.error('Failed to load tenant config on dashboard:', error)
+    }
+  }
+})
 </script>

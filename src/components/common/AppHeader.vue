@@ -6,11 +6,11 @@
         <div class="flex items-center space-x-4">
           <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
             <span class="text-sm font-bold text-white">
-              {{ tenantConfig.tenantName.charAt(0).toUpperCase() }}
+              {{ (tenantConfigStore.config.tenantName ? tenantConfigStore.config.tenantName.charAt(0).toUpperCase() : '?') }}
             </span>
           </div>
           <h1 class="text-xl font-semibold text-gray-900">
-            {{ tenantConfig.displayName }}
+            {{ tenantConfigStore.config.displayName }}
           </h1>
         </div>
 
@@ -19,7 +19,7 @@
           <div class="flex items-center space-x-3">
             <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
               <span class="text-sm font-medium text-gray-700">
-                {{ authStore.user?.username?.charAt(0).toUpperCase() }}
+                {{ (authStore.user?.username ? authStore.user.username.charAt(0).toUpperCase() : '?') }}
               </span>
             </div>
             <div class="hidden md:block">
@@ -41,12 +41,12 @@
 
 <script setup>
 import { useAuthStore } from '../../stores/auth.js'
-import { getTenantConfig } from '../../utils/tenant-config.js'
+import { useTenantConfigStore } from '../../stores/tenantConfig.js'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 const router = useRouter()
-const tenantConfig = getTenantConfig()
+const tenantConfigStore = useTenantConfigStore()
 
 const handleLogout = () => {
   authStore.logout()

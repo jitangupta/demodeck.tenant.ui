@@ -39,7 +39,7 @@
           <div class="flex-shrink-0">
             <div class="h-10 w-10 bg-primary-600 rounded-full flex items-center justify-center">
               <span class="text-sm font-medium text-white">
-                {{ user.username.charAt(0).toUpperCase() }}
+                {{ (user.username ? user.username.charAt(0).toUpperCase() : '?') }}
               </span>
             </div>
           </div>

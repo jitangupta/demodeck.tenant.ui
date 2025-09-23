@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getTenantConfig } from './tenant-config.js'
+import { useTenantConfigStore } from '../stores/tenantConfig.js'
 
 class ApiClient {
   constructor(baseURL) {
@@ -53,13 +53,54 @@ class ApiClient {
 }
 
 // API clients for different services
-const createApiClients = () => {
-  const config = getTenantConfig()
-  
+const createApiClients = async () => {
+  const tenantConfigStore = useTenantConfigStore()
+
+  // Use already loaded tenant config
+  if (!tenantConfigStore.initialized) {
+    throw new Error('Tenant configuration not loaded. Cannot create API clients.')
+  }
+
+  const config = tenantConfigStore.config
+
   return {
     authApi: new ApiClient(config.authApiUrl),
     productApi: new ApiClient(`${config.apiBaseUrl}/${config.tenantName}`)
   }
 }
 
-export const { authApi, productApi } = createApiClients()
+// Initialize API clients asynchronously
+let apiClients = null
+let initPromise = null
+
+const initializeApiClients = async () => {
+  if (!initPromise) {
+    initPromise = createApiClients()
+  }
+  if (!apiClients) {
+    apiClients = await initPromise
+  }
+  return apiClients
+}
+
+// Reset API clients when tenant config changes
+export const resetApiClients = () => {
+  apiClients = null
+  initPromise = null
+  console.log('🔄 API clients reset - will reinitialize with new tenant config')
+}
+
+export const getApiClients = async () => {
+  return await initializeApiClients()
+}
+
+// Legacy exports for backward compatibility - these will be async
+export const getAuthApi = async () => {
+  const clients = await getApiClients()
+  return clients.authApi
+}
+
+export const getProductApi = async () => {
+  const clients = await getApiClients()
+  return clients.productApi
+}

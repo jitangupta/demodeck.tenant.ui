@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { productApi } from '../utils/api.js'
+import { getProductApi } from '../utils/api.js'
 
 export const useTenantStore = defineStore('tenant', () => {
   // State
@@ -14,8 +14,9 @@ export const useTenantStore = defineStore('tenant', () => {
     error.value = null
 
     try {
+      const productApi = await getProductApi()
       const response = await productApi.get('/api/User')
-      
+
       if (response.success) {
         users.value = response.data
       } else {

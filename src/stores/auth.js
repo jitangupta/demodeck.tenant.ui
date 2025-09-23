@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { jwtDecode } from 'jwt-decode'
-import { authApi } from '../utils/api.js'
-import { getTenantConfig } from '../utils/tenant-config.js'
+import { getAuthApi } from '../utils/api.js'
+import { useTenantConfigStore } from './tenantConfig.js'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -18,12 +18,20 @@ export const useAuthStore = defineStore('auth', () => {
   // Actions
   const login = async (credentials) => {
     loading.value = true
-    
+
     try {
-      const tenantConfig = getTenantConfig()
+      const tenantConfigStore = useTenantConfigStore()
+
+      // Use already loaded tenant config (should be loaded at app startup)
+      // Don't reload tenant config during login
+      if (!tenantConfigStore.initialized) {
+        throw new Error('Tenant configuration not loaded. Please refresh the page.')
+      }
+
+      const authApi = await getAuthApi()
       const loginRequest = {
         ...credentials,
-        tenantName: tenantConfig.tenantName
+        tenantName: tenantConfigStore.config.tenantName
       }
 
       const response = await authApi.post('/api/Auth/token', loginRequest)
