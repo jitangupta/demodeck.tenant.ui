@@ -47,12 +47,10 @@ export const useTenantConfigStore = defineStore('tenantConfig', () => {
       setTenantStyling(config.value)
 
       initialized.value = true
-      console.log('Tenant configuration loaded:', config.value)
 
       return config.value
     } catch (err) {
       error.value = err.message || 'Failed to load tenant configuration'
-      console.error('Error loading tenant configuration:', err)
 
       // For critical errors (unknown tenant, API failures in production)
       // Don't set initialized to true, so retries are possible
@@ -62,7 +60,6 @@ export const useTenantConfigStore = defineStore('tenantConfig', () => {
       }
 
       // For other errors, use fallback acme configuration
-      console.log('Using fallback acme configuration due to error')
       config.value = {
         ...config.value,
         tenantName: 'acme',

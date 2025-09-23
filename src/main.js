@@ -20,14 +20,8 @@ const initializeApp = async () => {
     // Make tenant config available globally if needed
     app.config.globalProperties.$tenantConfig = tenantConfigStore.config
   } catch (error) {
-    console.error('Failed to initialize tenant configuration:', error)
-
-    // For critical tenant errors, show error page instead of continuing
-    if (error.message.includes('not found') || error.message.includes('Unknown tenant')) {
-      // You can redirect to an error page or show an error component
-      // For now, we'll log the error and let the app handle it in components
-      console.error('Critical tenant configuration error - app may not function properly')
-    }
+    // Error is already handled in the store
+    // For critical tenant errors, the store will throw and prevent app initialization
   }
 
   app.mount('#app')

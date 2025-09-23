@@ -1,11 +1,9 @@
 const getTenantAndEnvironmentFromUrl = () => {
   const hostname = window.location.hostname
 
-  console.log(`Current hostname: ${hostname}`)
 
   // For local development: use acme tenant
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    console.log('Detected local environment')
     return {
       tenantName: 'acme',
       environment: 'local'
@@ -49,7 +47,6 @@ const getTenantAndEnvironmentFromUrl = () => {
 const fetchTenantConfigFromApi = async (tenantName, environment) => {
   try {
     const tenantApiUrl = process.env.VUE_APP_TENANT_API_URL || 'https://tenant-api.demodeck.xyz'
-    console.log(`tenant api url: ${tenantApiUrl}`);
     const response = await fetch(`${tenantApiUrl}/api/tenant/${tenantName}?environment=${environment}`)
 
     if (!response.ok) {
@@ -113,27 +110,22 @@ const getDefaultTenantConfig = (tenantName, environment) => {
 
 export const getTenantConfig = async () => {
   const { tenantName, environment } = getTenantAndEnvironmentFromUrl()
-  console.log(`Getting tenant config for tenant: ${tenantName}, environment: ${environment}`)
 
   // For local development, always use default acme configuration
   if (environment === 'local') {
-    console.log('Using local environment config - defaulting to acme')
     return getDefaultTenantConfig('acme', environment)
   }
 
   // For unknown environment, throw error
   if (environment === 'unknown') {
     const error = new Error(`Unknown tenant hostname pattern. Unable to determine tenant configuration.`)
-    console.error(error.message)
     throw error
   }
 
   // For hosted environments, try to fetch from tenant-api
-  console.log('Attempting to fetch from tenant API...')
   const apiConfig = await fetchTenantConfigFromApi(tenantName, environment)
 
   if (apiConfig) {
-    console.log('Successfully fetched tenant config from API')
     return {
       ...apiConfig,
       tenantName,
@@ -144,28 +136,32 @@ export const getTenantConfig = async () => {
   // For production environments, if API fails, throw error (don't fallback)
   if (environment === 'production' || environment === 'qa' || environment === 'staging') {
     const error = new Error(`Tenant '${tenantName}' not found or tenant API is unavailable. Cannot proceed without valid tenant configuration.`)
-    console.error(error.message)
     throw error
   }
 
   // For other environments, fallback to acme default
-  console.log('Falling back to acme default tenant config')
   return getDefaultTenantConfig('acme', environment)
 }
 
 export const setTenantStyling = (config) => {
-  console.log('🎨 Setting tenant styling:', config)
-
   // Set CSS variables
   document.documentElement.style.setProperty('--primary-color', config.primaryColor)
 
-  // Set title with a small delay to ensure DOM is ready
+  // Set title immediately and with delays to ensure it sticks
+  document.title = config.displayName
+
+  // Try multiple times to ensure title is set
   setTimeout(() => {
     document.title = config.displayName
-    console.log('✅ Title set to:', document.title)
-  }, 10)
+  }, 50)
 
-  console.log('✅ Primary color set to:', config.primaryColor)
+  setTimeout(() => {
+    document.title = config.displayName
+  }, 200)
+
+  setTimeout(() => {
+    document.title = config.displayName
+  }, 500)
 
   // Update favicon if needed
   const favicon = document.querySelector('link[rel="icon"]')

@@ -87,7 +87,6 @@ const initializeApiClients = async () => {
 export const resetApiClients = () => {
   apiClients = null
   initPromise = null
-  console.log('🔄 API clients reset - will reinitialize with new tenant config')
 }
 
 export const getApiClients = async () => {

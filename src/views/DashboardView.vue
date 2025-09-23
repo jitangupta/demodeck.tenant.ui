@@ -107,21 +107,24 @@ import UserList from '../components/tenant/UserList.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useTenantStore } from '../stores/tenant.js'
 import { useTenantConfigStore } from '../stores/tenantConfig.js'
+import { useDocumentTitle } from '../composables/useDocumentTitle.js'
 import { onMounted } from 'vue'
 
 const authStore = useAuthStore()
 const tenantStore = useTenantStore()
 const tenantConfigStore = useTenantConfigStore()
 
+// Use the document title composable
+useDocumentTitle()
+
 onMounted(async () => {
   // Tenant config should already be loaded by main.js
   // Only load if not already initialized (shouldn't happen normally)
   if (!tenantConfigStore.initialized) {
-    console.warn('Tenant config not initialized on dashboard - loading now')
     try {
       await tenantConfigStore.loadTenantConfig()
     } catch (error) {
-      console.error('Failed to load tenant config on dashboard:', error)
+      // Error is already handled in the store
     }
   }
 })
