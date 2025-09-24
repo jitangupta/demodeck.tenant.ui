@@ -47,6 +47,13 @@
                 placeholder="Enter your password"
               />
             </div>
+
+            <!-- Forgot Password Link -->
+            <div class="flex items-center justify-end">
+              <a href="#" class="text-sm text-primary-600 hover:text-primary-500 font-medium">
+                Forgot your password?
+              </a>
+            </div>
           </div>
 
           <!-- Error Message -->
