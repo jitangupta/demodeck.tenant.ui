@@ -1,6 +1,6 @@
 const getTenantAndEnvironmentFromUrl = () => {
   const hostname = window.location.hostname
-
+  
 
   // For local development: use acme tenant
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
@@ -46,7 +46,7 @@ const getTenantAndEnvironmentFromUrl = () => {
 
 const fetchTenantConfigFromApi = async (tenantName, environment) => {
   try {
-    const tenantApiUrl = process.env.VUE_APP_TENANT_API_URL || 'https://tenant-api.demodeck.xyz'
+    const tenantApiUrl = process.env.VUE_APP_TENANT_API_URL || 'http://tenant-api.k8s.demodeck.xyz'
     const response = await fetch(`${tenantApiUrl}/api/tenant/${tenantName}?environment=${environment}`)
 
     if (!response.ok) {
