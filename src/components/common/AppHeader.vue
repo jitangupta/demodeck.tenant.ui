@@ -14,6 +14,24 @@
           </h1>
         </div>
 
+        <!-- Navigation Links -->
+        <nav class="hidden md:flex items-center space-x-6" v-if="authStore.isAuthenticated">
+          <router-link
+            to="/dashboard"
+            class="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+            active-class="text-primary-600"
+          >
+            Dashboard
+          </router-link>
+          <router-link
+            to="/tasks"
+            class="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+            active-class="text-primary-600"
+          >
+            Tasks
+          </router-link>
+        </nav>
+
         <!-- User Menu -->
         <div class="flex items-center space-x-6" v-if="authStore.isAuthenticated">
           <div class="flex items-center space-x-3">
