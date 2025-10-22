@@ -1,6 +1,6 @@
 const getTenantAndEnvironmentFromUrl = () => {
-  const hostname = window.location.hostname
-  
+  // const hostname = window.location.hostname
+  const hostname = "acme.qa.k8s.demodeck.xyz" // Development override 
 
   // For local development: use acme tenant
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
@@ -46,8 +46,21 @@ const getTenantAndEnvironmentFromUrl = () => {
 
 const fetchTenantConfigFromApi = async (tenantName, environment) => {
   try {
-    const tenantApiUrl = process.env.VUE_APP_TENANT_API_URL || 'http://tenant-api.k8s.demodeck.xyz'
-    const response = await fetch(`${tenantApiUrl}/api/tenant/${tenantName}?environment=${environment}`)
+    // Determine API gateway URL based on environment
+    let apiGatewayUrl
+    if (process.env.VUE_APP_API_GATEWAY_URL) {
+      apiGatewayUrl = process.env.VUE_APP_API_GATEWAY_URL
+    } else if (environment === 'local') {
+      apiGatewayUrl = 'http://localhost:5008'
+    } else {
+      apiGatewayUrl = 'http://api.k8s.demodeck.xyz'
+    }
+
+    const response = await fetch(`${apiGatewayUrl}/tenant/api/tenant/${tenantName}?environment=${environment}`, {
+      headers: {
+        'X-Tenant': tenantName
+      }
+    })
 
     if (!response.ok) {
       throw new Error(`Failed to fetch tenant config: ${response.statusText}`)
@@ -88,14 +101,26 @@ const getDefaultTenantConfig = (tenantName, environment) => {
     ? 'Acme Corporation'
     : process.env.VUE_APP_TITLE || `${tenantName.charAt(0).toUpperCase() + tenantName.slice(1)} Portal`
 
+  // Determine API gateway URL based on environment
+  // Environment variable takes precedence, otherwise use environment-specific defaults
+  let apiGatewayUrl
+  if (process.env.VUE_APP_API_GATEWAY_URL) {
+    apiGatewayUrl = process.env.VUE_APP_API_GATEWAY_URL
+  } else if (environment === 'local') {
+    apiGatewayUrl = 'http://localhost:5008'
+  } else {
+    // For deployed environments (qa, staging, production, etc.)
+    apiGatewayUrl = 'http://api.k8s.demodeck.xyz'
+  }
+
   return {
     tenantName,
     environment,
     displayName: defaultTitle,
     primaryColor: process.env.VUE_APP_PRIMARY_COLOR || '#dc2626',
     logoUrl: process.env.VUE_APP_LOGO_URL || `/logos/${tenantName}-logo.png`,
-    authApiUrl: process.env.VUE_APP_AUTH_API_URL || 'http://localhost:5130',
-    apiBaseUrl: process.env.VUE_APP_API_BASE_URL || 'http://localhost:5142',
+    authApiUrl: `${apiGatewayUrl}/auth`,
+    apiBaseUrl: `${apiGatewayUrl}/product`,
     // Default values for other tenant properties
     tenantId: `tnt_${tenantName}001`,
     isActive: true,

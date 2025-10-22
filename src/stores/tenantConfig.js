@@ -60,6 +60,19 @@ export const useTenantConfigStore = defineStore('tenantConfig', () => {
       }
 
       // For other errors, use fallback acme configuration
+      // Detect if we're in local or deployed environment
+      const hostname = window.location.hostname
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1'
+
+      let apiGatewayUrl
+      if (process.env.VUE_APP_API_GATEWAY_URL) {
+        apiGatewayUrl = process.env.VUE_APP_API_GATEWAY_URL
+      } else if (isLocal) {
+        apiGatewayUrl = 'http://localhost:5008'
+      } else {
+        apiGatewayUrl = 'http://api.k8s.demodeck.xyz'
+      }
+
       config.value = {
         ...config.value,
         tenantName: 'acme',
@@ -67,8 +80,8 @@ export const useTenantConfigStore = defineStore('tenantConfig', () => {
         primaryColor: '#dc2626',
         logoUrl: '/logos/acme-logo.png',
         environment: 'fallback',
-        authApiUrl: process.env.VUE_APP_AUTH_API_URL || 'http://localhost:5130',
-        apiBaseUrl: process.env.VUE_APP_API_BASE_URL || 'http://localhost:5142'
+        authApiUrl: `${apiGatewayUrl}/auth`,
+        apiBaseUrl: `${apiGatewayUrl}/product`
       }
 
       setTenantStyling(config.value)

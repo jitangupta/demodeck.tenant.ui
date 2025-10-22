@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useTenantConfigStore } from '../stores/tenantConfig.js'
 
 class ApiClient {
-  constructor(baseURL) {
+  constructor(baseURL, tenantConfig = null) {
     this.client = axios.create({
       baseURL,
       timeout: 10000,
@@ -11,17 +11,30 @@ class ApiClient {
       }
     })
 
+    this.tenantConfig = tenantConfig
     this.setupInterceptors()
   }
 
   setupInterceptors() {
-    // Request interceptor to add auth token
+    // Request interceptor to add auth token and tenant headers
     this.client.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem('auth_token')
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
+
+        // Add tenant headers if tenant config is available
+        if (this.tenantConfig) {
+          config.headers['X-Tenant'] = this.tenantConfig.tenantName
+          if (this.tenantConfig.tenantId) {
+            config.headers['X-Tenant-Id'] = this.tenantConfig.tenantId
+          }
+          if (this.tenantConfig.currentVersion) {
+            config.headers['X-Tenant-Version'] = this.tenantConfig.currentVersion
+          }
+        }
+
         return config
       },
       (error) => Promise.reject(error)
@@ -64,8 +77,8 @@ const createApiClients = async () => {
   const config = tenantConfigStore.config
 
   return {
-    authApi: new ApiClient(config.authApiUrl),
-    productApi: new ApiClient(`${config.apiBaseUrl}/${config.tenantName}`)
+    authApi: new ApiClient(config.authApiUrl, config),
+    productApi: new ApiClient(`${config.apiBaseUrl}/${config.tenantName}`, config)
   }
 }
 
