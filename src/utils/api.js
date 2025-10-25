@@ -78,7 +78,7 @@ const createApiClients = async () => {
 
   return {
     authApi: new ApiClient(config.authApiUrl, config),
-    productApi: new ApiClient(`${config.apiBaseUrl}/${config.tenantName}`, config)
+    productApi: new ApiClient(config.apiBaseUrl, config)
   }
 }
 

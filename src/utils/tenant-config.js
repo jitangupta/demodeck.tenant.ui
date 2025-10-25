@@ -83,8 +83,8 @@ const fetchTenantConfigFromApi = async (tenantName, environment) => {
         currentVersion: tenantData.currentVersion,
         customHeaders: tenantData.customHeaders,
         createdAt: tenantData.createdAt,
-        authApiUrl: tenantData.authAPI,
-        apiBaseUrl: tenantData.productAPI
+        authApiUrl: `${apiGatewayUrl}/auth`,
+        apiBaseUrl: `${apiGatewayUrl}/product`
       }
     }
 
