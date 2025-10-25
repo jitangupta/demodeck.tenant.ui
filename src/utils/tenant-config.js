@@ -1,6 +1,6 @@
 const getTenantAndEnvironmentFromUrl = () => {
-  // const hostname = window.location.hostname
-  const hostname = "acme.qa.k8s.demodeck.xyz" // Development override 
+  const hostname = window.location.hostname
+  // const hostname = "acme.qa.k8s.demodeck.xyz" // Development override 
 
   // For local development: use acme tenant
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
